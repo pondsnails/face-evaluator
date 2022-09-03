@@ -241,7 +241,7 @@ async function rateImages(auth) {
         fields: 'id, parents',
       });
 
-      console.log("Successed to rate image:", previousFileStatus[i]["parents_name"], previousFileStatus[i]["name"], "to", value)
+      console.log("Successed in rating image:", previousFileStatus[i]["parents_name"], previousFileStatus[i]["name"], "to", value)
       doneFiles.push(previousFileStatus[i]["id"])
       if (doneFiles.length > 10) {
         doneFiles.shift;
