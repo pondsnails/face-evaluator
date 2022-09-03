@@ -1,0 +1,134 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #F5F5FA;
+    font-family: "MS 明朝";
+    font-size: 80%;
+    color: dimgrey;
+    width: 100vw;
+}
+
+a {
+    text-decoration: none;
+    color: dimgrey;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    display: flex;
+}
+
+li {
+    margin: 0 0 0 15px;
+    font-size: 14px;
+}
+
+nav {
+    margin: 0 0 0 auto;
+}
+
+header {
+    width: 100%;
+    padding: 30px 4% 10px;
+    background: #f5f5fa;
+    border: 0;
+    border-radius: 16px;
+    box-shadow: -10px -10px 30px 0 #fff, 10px 10px 30px 0 #1d0dca17;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+}
+
+header .btn {
+    background: #f5f5fa;
+    box-shadow: 10px 10px 3px 0 #1d0dca13 inset;
+    color: #2a1f62;
+}
+
+header .btn:hover {
+    background-color: #ebebf0;
+    box-shadow: 10px 10px 3px 0 #1d0dca13 inset;
+    border-radius: 16px;
+}
+
+.article-body {
+    margin: auto;
+    width: 65vw;
+}
+
+.image-group {
+    display: block;
+}
+
+.unlabeled-image {
+    margin: 0 auto;
+    border: 0;
+    border-radius: 8px;
+    box-shadow: -10px -10px 30px 0 #fff, 10px 10px 30px 0 #1d0dca17;
+    box-sizing: border-box;
+    transition: 0.5s;
+}
+
+.unlabeled-image:hover {
+    transform: scale(0.99, 0.99);
+    transition: 0.7s;
+}
+
+.button-group {
+    margin: auto;
+    align-items: center;
+}
+
+.inner {
+    margin: auto;
+    display: flex;
+    justify-content: space-evenly;
+    max-width: 60vh;
+}
+
+.btn {
+    align-items: center;
+    background: #f5f5fa;
+    border: 0;
+    border-radius: 8px;
+    box-shadow: -10px -10px 30px 0 #fff, 10px 10px 30px 0 #1d0dca17;
+    box-sizing: border-box;
+    color: #2a1f62;
+    cursor: pointer;
+    justify-content: center;
+    line-height: 1.5rem;
+    padding: 20px;
+    margin-bottom: 8px;
+    position: relative;
+    text-align: left;
+    transition: .2s;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    white-space: pre;
+    width: max-content;
+    word-break: normal;
+    word-spacing: normal;
+    font-size: 12px;
+}
+
+.btn:hover {
+    background-color: #ebebf0;
+    box-shadow: -15px -15px 30px 0 #fff, 15px 15px 30px 0 #1d0dca17;
+    border-radius: 80px;
+    transition: .6s;
+}
+
+@media (max-width: 400px) {
+    .btn {
+        padding: 18px;
+    }
+}
+
+
+/* Parent background */

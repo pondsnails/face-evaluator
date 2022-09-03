@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>tkgw-2-4 project</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- [if lt IE 9] -->
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+    <script src="/js/drive.js"></script>
+    <!-- [endif] -->
+</head>
+<body>
+    <!----- header----->
+    <header>
+        <h1><a href="/">Project</a></h1>
+    </header>
+    <!----- /header ----->
+    <!----- main ----->
+    <section class="article-body">
+
+        <article>
+            <section style="text-align:center">
+                <div class="image-group" id="image-group">
+                    <h2 id="image_information"><%= parents_name %> <%= file_name %></h2>
+                    <p id="image_link"><%= image_link %></p>
+                    <pre id="content" style="white-space: pre-wrap;"></pre>
+                    <img id="face-image" src=<%= image_link %> class="unlabeled-image" onerror="document.getElementById('image_information').innerText='画像を読み込み中';document.getElementById('face-image').style.display = 'none';location.reload();">
+                </div>
+                <div class="content">
+                    <p>評価</p>
+                    <form method="POST" class="button-group">
+                        <div class="inner">
+                            <button class="btn" role="button" name="value" value=1>1</button>
+                            <button class="btn" role="button" name="value" value=2>2</button>
+                            <button class="btn" role="button" name="value" value=3>3</button>
+                            <button class="btn" role="button" name="value" value=4>4</button>
+                            <button class="btn" role="button" name="value" value=5>5</button>
+                        </div>
+                        <button class="btn" role="button" name="value" value=0>評価できない(顔を認識できない)</button>
+                    </form>
+                </div>
+            </section>
+        </article>
+    </section>
+    <!----- /main ----->
+
+    <!----- footer ----->
+    <footer></footer>
+    <!----- /footer ----->
+</body>
+
+</html>
