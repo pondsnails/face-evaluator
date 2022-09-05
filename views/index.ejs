@@ -7,11 +7,7 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/style.css">
-    <!-- [if lt IE 9] -->
-    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
     <script src="/js/drive.js"></script>
-    <!-- [endif] -->
 </head>
 
 <body>
@@ -28,7 +24,7 @@
                 <div id="image-group" class="image-group">
                     <h2 id="image_information"><%= parents_name %> <%= file_name %></h2>
                     <pre id="content" style="white-space: pre-wrap;"></pre>
-                    <img id="face-image" src=<%=image_link %> class="unlabeled-image" onerror="location.reload();">
+                    <img id="face-image" src=<%=image_link %> class="unlabeled-image">
                 </div>
                 <div class="content">
                     <p>評価</p>
