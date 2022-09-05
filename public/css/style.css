@@ -61,10 +61,6 @@ header .btn:hover {
     width: 65vw;
 }
 
-.image-group {
-    visibility: visible;
-}
-
 .unlabeled-image {
     margin: 0 auto;
     border: 0;

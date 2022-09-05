@@ -36,9 +36,9 @@ async function main() {
       shownFileStatus = waitingFileStatus[n]
       previousFileStatus = shownFileStatus;
       num = Number(shownFileStatus['name'].split(/x|y/)[1].replace(/[^0-9]/g, '')) * 30 + Number(shownFileStatus['name'].split(/x|y/)[2].replace(/[^0-9]/g, ''))
-      gen = shownFileStatus["parents_name"].replace(/[^0-9]/g, '') + "世代"
-      res.render('index.ejs', { image_link: shownFileStatus["link"], parents_name: shownFileStatus["parents_name"].replace(/[^0-9]/g, '') + "世代", file_name: String(num) + "番" })
-      console.log(gen, num)
+      gen = shownFileStatus["parents_name"].replace(/[^0-9]/g, '')
+      res.render('index.ejs', { image_link: shownFileStatus["link"], parents_name: gen + "世代", file_name: String(num) + "番" })
+      console.log("Now, Generation",gen,"No."+num, "is being displaying")
     }
 
     waitingFileStatus.shift()
@@ -55,11 +55,11 @@ async function main() {
       var n = (waitingFileStatus.length == 1) ? 0 : 1;
       shownFileStatus = waitingFileStatus[n]
       num = Number(shownFileStatus['name'].split(/x|y/)[1].replace(/[^0-9]/g, '')) * 30 + Number(shownFileStatus['name'].split(/x|y/)[2].replace(/[^0-9]/g, ''))
-      gen = shownFileStatus["parents_name"].replace(/[^0-9]/g, '') + "世代"
-      res.render('index.ejs', { image_link: shownFileStatus["link"], parents_name: shownFileStatus["parents_name"].replace(/[^0-9]/g, '') + "世代", file_name: String(num) + "番" })
+      gen = shownFileStatus["parents_name"].replace(/[^0-9]/g, '')
+      res.render('index.ejs', { image_link: shownFileStatus["link"], parents_name: gen + "世代", file_name: String(num) + "番" })
     }
     waitingFileStatus.shift()
-    console.log(gen, num)
+    console.log("Now, Generation",gen,"No."+num, "is being displaying")
     res.end
 
   })
@@ -220,8 +220,8 @@ async function rateImages(auth) {
       fields: 'id, parents',
     });
     console.log("Successed in rating image:",
-      FileToBeSent["parents_name"].replace(/[^0-9]/g, '') + "世代",
-      Number(FileToBeSent['name'].split(/x|y/)[1].replace(/[^0-9]/g, '')) * 30 + Number(FileToBeSent['name'].split(/x|y/)[2].replace(/[^0-9]/g, '')),
+      "Generation",FileToBeSent["parents_name"].replace(/[^0-9]/g, ''),
+      "No."+(Number(FileToBeSent['name'].split(/x|y/)[1].replace(/[^0-9]/g, '')) * 30 + Number(FileToBeSent['name'].split(/x|y/)[2].replace(/[^0-9]/g, ''))),
       "to", value)
 
     previousFileStatus = shownFileStatus
