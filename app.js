@@ -5,17 +5,20 @@ const fs = require("fs");
 const readline = require("readline");
 const { google } = require("googleapis");
 const { resolve } = require('path');
+const { file } = require('googleapis/build/src/apis/file');
 const SCOPES = [
   `https://www.googleapis.com/auth/drive`,
 ];
 const TOKEN_PATH = "token.json";
-var shownFileStatus = [];
-var previousFileStatus = [];
+var waitingFileStatus = [];
+var shownFileStatus;
+var previousFileStatus;
+var doneList = [];
 var value;
 var ratedImagesFolderList = {};
-var isProcessingCollectingFolders = false;
 var genFolders = {};
-var doneFiles = [];
+var gen;
+var num;
 
 main()
 
@@ -27,52 +30,38 @@ async function main() {
 
   //GET時の処理
   app.get('/', (req, res) => {
-    if (previousFileStatus.length > 0) {
-      previousFileStatus = [];
+    readFile(ListFiles)
+    if (waitingFileStatus.length != 0) {
+      var n = (waitingFileStatus.length == 1) ? 0 : 1;
+      shownFileStatus = waitingFileStatus[n]
+      previousFileStatus = shownFileStatus;
+      num = Number(shownFileStatus['name'].split(/x|y/)[1].replace(/[^0-9]/g, '')) * 30 + Number(shownFileStatus['name'].split(/x|y/)[2].replace(/[^0-9]/g, ''))
+      gen = shownFileStatus["parents_name"].replace(/[^0-9]/g, '') + "世代"
+      res.render('index.ejs', { image_link: shownFileStatus["link"], parents_name: shownFileStatus["parents_name"].replace(/[^0-9]/g, '') + "世代", file_name: String(num) + "番" })
+      console.log(gen, num)
     }
 
-    readFile(ListFiles)
-    if (shownFileStatus.length != 0) {
-      if (shownFileStatus.length == 1) {
-        previousFileStatus.push(shownFileStatus[0])
-        num = Number(shownFileStatus[0]['name'].split(/x|y/)[1].replace(/[^0-9]/g, ''))*30+Number(shownFileStatus[0]['name'].split(/x|y/)[2].replace(/[^0-9]/g, ''))
-        console.log(num)
-        res.render('index.ejs', { image_link: shownFileStatus[0]["link"], parents_name:  shownFileStatus[0]["parents_name"].replace(/[^0-9]/g, '')+"世代", file_name: String(num)+"番" })
-      } else if (shownFileStatus.length > 1) {
-        previousFileStatus.push(shownFileStatus[1])
-        num = Number(shownFileStatus[1]['name'].split(/x|y/)[1].replace(/[^0-9]/g, ''))*30+Number(shownFileStatus[1]['name'].split(/x|y/)[2].replace(/[^0-9]/g, ''))
-        console.log(num)
-        res.render('index.ejs', { image_link: shownFileStatus[1]["link"], parents_name: shownFileStatus[0]["parents_name"].replace(/[^0-9]/g, '')+"世代", file_name: String(num)+"番" })
-      }
-    }
-    shownFileStatus.shift()
+    waitingFileStatus.shift()
   });
 
   //POST時の処理
   app.post('/', (req, res) => {
     value = req.body.value;
-    if (previousFileStatus.length != 0) {
-      isProcessingCollectingFolders = true;
+    if (shownFileStatus != undefined) {
       readFile(collectFolders)
     }
     readFile(ListFiles)
-    if (shownFileStatus.length != 0) {
-      if (shownFileStatus.length == 1) {
-        previousFileStatus.push(shownFileStatus[0])
-        num = Number(shownFileStatus[0]['name'].split(/x|y/)[1].replace(/[^0-9]/g, ''))*30+Number(shownFileStatus[0]['name'].split(/x|y/)[2].replace(/[^0-9]/g, ''))
-
-        res.render('index.ejs', { image_link: shownFileStatus[0]["link"], parents_name: shownFileStatus[0]["parents_name"].replace(/[^0-9]/g, '')+"世代", file_name: String(num)+"番" })
-      } else if (shownFileStatus.length > 1) {
-        previousFileStatus.push(shownFileStatus[1])
-        num = Number(shownFileStatus[1]['name'].split(/x|y/)[1].replace(/[^0-9]/g, ''))*30+Number(shownFileStatus[1]['name'].split(/x|y/)[2].replace(/[^0-9]/g, ''))
-        res.render('index.ejs', { image_link: shownFileStatus[1]["link"], parents_name: shownFileStatus[1]["parents_name"].replace(/[^0-9]/g, '')+"世代", file_name: String(num)+"番" })
-      }
-      previousFileStatus.forEach((file) => {
-        file["value"] = value
-      })
-
+    if (waitingFileStatus.length != 0) {
+      var n = (waitingFileStatus.length == 1) ? 0 : 1;
+      shownFileStatus = waitingFileStatus[n]
+      num = Number(shownFileStatus['name'].split(/x|y/)[1].replace(/[^0-9]/g, '')) * 30 + Number(shownFileStatus['name'].split(/x|y/)[2].replace(/[^0-9]/g, ''))
+      gen = shownFileStatus["parents_name"].replace(/[^0-9]/g, '') + "世代"
+      res.render('index.ejs', { image_link: shownFileStatus["link"], parents_name: shownFileStatus["parents_name"].replace(/[^0-9]/g, '') + "世代", file_name: String(num) + "番" })
     }
+    waitingFileStatus.shift()
+    console.log(gen, num)
     res.end
+
   })
   readFile(ListFiles)
 
@@ -81,16 +70,11 @@ async function main() {
 }
 
 // 事前に取得したファイルの重複を削除
-function removeDuplication() {
-  var check = [];
-  shownFileStatus.forEach(function (list) {
-    check[list.id] = (list.id in check) ? true : false;
-  });
-
-  var filtered = shownFileStatus.filter(function (e) {
-    return false === check[e.id]
-  });
-  shownFileStatus = filtered;
+function removeDuplicationShownFile() {
+  const result = waitingFileStatus.filter((element, index, self) =>
+    self.findIndex(e => e.id === element.id) === index
+  );
+  waitingFileStatus = result;
 }
 
 // 証明書の確認
@@ -163,7 +147,6 @@ async function ListFiles(auth) {
     const res = await drive.files.list(params);
     const files = res.data.files;
     if (files.length) {
-      // console.log('Files:');
       files.map((file) => {
         recursiveListFiles(auth, file.id, 0)
       });
@@ -185,23 +168,22 @@ async function recursiveListFiles(auth, folderId, count) {
     pageSize: 2,
     q: `'${folderId}' in parents and trashed = false`,
   }
-  drive.files
+  await drive.files
     .list(params)
     .then((response) => {
       const files = response.data.files;
       files.map((file) => {
-        // console.log(str, file.name, file.id)
         recursiveListFiles(auth, file.id, count + 1);
         if (file.name.includes("gen_")) {
           genFolders[file.id] = file.name
         }
         if (file.name.includes("split_y")) {
-          shownFileStatus.push({ id: file.id, parents: folderId, link: "https://drive.google.com/uc?id=" + file.id + "&png", name: file.name, parents_name: genFolders[folderId] })
+          waitingFileStatus.push({ id: file.id, parents: folderId, link: "https://drive.google.com/uc?id=" + file.id + "&png", name: file.name, parents_name: genFolders[folderId] })
         }
       })
     })
-  shownFileStatus = Array.from(new Set(shownFileStatus))
-  removeDuplication()
+
+  removeDuplicationShownFile()
 }
 
 // 評価フォルダの検索
@@ -211,7 +193,7 @@ async function collectFolders(auth) {
   const params = {
     q: `'${ratedMenImagesFolderId}' in parents and trashed = false`,
   }
-  drive.files
+  await drive.files
     .list(params)
     .then((response) => {
       const files = response.data.files;
@@ -227,32 +209,31 @@ async function collectFolders(auth) {
 async function rateImages(auth) {
 
   const drive = google.drive({ version: 'v3', auth });
-  previousFileStatus = [...new Set(previousFileStatus)]
+
 
   try {
-    for (let i = 0; i < previousFileStatus.length; i++) {
-      shownFileStatus = shownFileStatus.filter(function (file) {
-        return file !== previousFileStatus[i]
-      })
-      drive.files.update({
-        fileId: previousFileStatus[i]["id"],
-        addParents: ratedImagesFolderList[previousFileStatus[i]["value"]],
-        removeParents: previousFileStatus[i]["parents"],
-        fields: 'id, parents',
+    var FileToBeSent = (previousFileStatus != undefined) ? previousFileStatus : shownFileStatus;
+    drive.files.update({
+      fileId: FileToBeSent["id"],
+      addParents: ratedImagesFolderList[String(value)],
+      removeParents: FileToBeSent["parents"],
+      fields: 'id, parents',
+    });
+    console.log("Successed in rating image:",
+      FileToBeSent["parents_name"].replace(/[^0-9]/g, '') + "世代",
+      Number(FileToBeSent['name'].split(/x|y/)[1].replace(/[^0-9]/g, '')) * 30 + Number(FileToBeSent['name'].split(/x|y/)[2].replace(/[^0-9]/g, '')),
+      "to", value)
+
+    previousFileStatus = shownFileStatus
+    doneList.push(FileToBeSent["id"]);
+    if (doneList.length > 10) doneList.shift();
+    for (let i = 0; i < doneList.length; i++) {
+      waitingFileStatus = waitingFileStatus.filter(file => {
+        return ((file.id != doneList[i]));
       });
-
-      console.log("Successed in rating image:", previousFileStatus[i]["parents_name"], previousFileStatus[i]["name"], "to", value)
-      doneFiles.push(previousFileStatus[i]["id"])
-      if (doneFiles.length > 10) {
-        doneFiles.shift;
-      }
-      previousFileStatus = previousFileStatus.filter(file => {
-        return ((file.id != previousFileStatus[i]["id"]));
-      })
-
-      isProcessingCollectingFolders = false;
     }
     return;
+
   } catch (err) {
     // TODO(developer) - Handle error
     throw err;

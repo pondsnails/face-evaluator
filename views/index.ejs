@@ -13,6 +13,7 @@
     <script src="/js/drive.js"></script>
     <!-- [endif] -->
 </head>
+
 <body>
     <!----- header----->
     <header>
@@ -24,11 +25,10 @@
 
         <article>
             <section style="text-align:center">
-                <div class="image-group" id="image-group">
+                <div id="image-group" class="image-group">
                     <h2 id="image_information"><%= parents_name %> <%= file_name %></h2>
-                    <p id="image_link"><%= image_link %></p>
                     <pre id="content" style="white-space: pre-wrap;"></pre>
-                    <img id="face-image" src=<%= image_link %> class="unlabeled-image" onerror="document.getElementById('image_information').innerText='画像を読み込み中';document.getElementById('face-image').style.display = 'none';location.reload();">
+                    <img id="face-image" src=<%=image_link %> class="unlabeled-image" onerror="location.reload();">
                 </div>
                 <div class="content">
                     <p>評価</p>

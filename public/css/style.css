@@ -62,7 +62,7 @@ header .btn:hover {
 }
 
 .image-group {
-    display: block;
+    visibility: visible;
 }
 
 .unlabeled-image {
