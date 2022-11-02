@@ -26,7 +26,6 @@ router.use(bodyParser.json());
 fs.readFile(FOLDER_ID_PATH, (err, content) => {
   if (err) return console.log("Error loading client secret file:", err);
   folderIdList = JSON.parse(content)
-  console.log(folderIdList)
 });
 
 //GET時の処理
@@ -35,11 +34,11 @@ router.get('/', (req, res) => {
   if (waitingFileStatus.length != 0) {
     shownFileStatus = waitingFileStatus[0]
     if (shownFileStatus["name"] != undefined) {
-      yNum = Number(shownFileStatus['name'].split(/x|y/)[1].replace(/[^0-9]/g, '')) * 30;
+      yNum = Number(shownFileStatus['name'].split(/x|y/)[1].replace(/[^0-9]/g, '')) * 15;
       xNum = Number(shownFileStatus['name'].split(/x|y/)[2].replace(/[^0-9]/g, ''));
       gen = shownFileStatus["parents_name"].replace(/[^0-9]/g, '');
       res.render('index.ejs', { image_link: shownFileStatus["link"], parents_name: gen + "世代", file_name: String(yNum + xNum) + "番" });
-      console.log("GET:"+String(yNum+xNum)+"番")
+      console.log("GET:" + String(yNum + xNum) + "番")
     }
   } else {
     res.render('index.ejs', { image_link: "", parents_name: "画像なし", file_name: "" })
@@ -57,15 +56,15 @@ router.post('/', (req, res) => {
   if (waitingFileStatus.length != 0) {
     shownFileStatus = waitingFileStatus[0]
     if (shownFileStatus["name"] != undefined) {
-      yNum = Number(shownFileStatus['name'].split(/x|y/)[1].replace(/[^0-9]/g, '')) * 30;
+      yNum = Number(shownFileStatus['name'].split(/x|y/)[1].replace(/[^0-9]/g, '')) * 15;
       xNum = Number(shownFileStatus['name'].split(/x|y/)[2].replace(/[^0-9]/g, ''));
       gen = shownFileStatus["parents_name"].replace(/[^0-9]/g, '');
       res.render('index.ejs', { image_link: shownFileStatus["link"], parents_name: gen + "世代", file_name: String(yNum + xNum) + "番" })
       doneList.push(shownFileStatus["id"])
     }
-    console.log("POST:"+String(yNum+xNum)+"番")
-    waitingFileStatus.splice(waitingFileStatus.indexOf(shownFileStatus),1)
-    while(waitingFileStatus.length > 5) {
+    console.log("POST:" + String(yNum + xNum) + "番")
+    waitingFileStatus.splice(waitingFileStatus.indexOf(shownFileStatus), 1)
+    while (waitingFileStatus.length > 5) {
       waitingFileStatus.pop()
     }
   }
@@ -147,20 +146,22 @@ async function getAccessToken(oAuth2Client, callback) {
 // Google Driveにあるファイルを取得
 async function ListFiles(auth) {
 
-  const drive = google.drive({ version: 'v3', auth });
+  const drive = google.drive({ version: "v3", auth });
   generatedMenFolderId = folderIdList['generatedMenFolderId']
   const params = {
     q: `'${generatedMenFolderId}' in parents and trashed = false`,
     pageSize: 3,
   }
-
   try {
     const res = await drive.files.list(params);
     const files = res.data.files;
+    console.log(files)
     if (files.length) {
       files.map((file) => {
         if (file.name.includes("gen_")) {
           genFolders[file.id] = file.name
+          CheckChildrenFiles(auth, file.id)
+
         }
         recursiveListFiles(auth, file.id, 0)
       });
@@ -171,6 +172,30 @@ async function ListFiles(auth) {
     console.log('The API returned an error: ' + err);
   }
 
+}
+
+async function CheckChildrenFiles(auth, folderId) {
+  const drive = google.drive({ version: 'v3', auth });
+  const params = {
+    q: `'${folderId}' in parents and trashed = false`,
+    pageSize: 1,
+  };
+  try {
+    const res = await drive.files.list(params);
+    const files = res.data.files;
+    if (files.length) {
+      // console.log()
+    } else {
+      const delParams = {
+        fileId: folderId,
+      };
+      drive.files.delete(delParams)
+        .then(res => console.log(res))
+        .catch(err => console.log(err));
+    }
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 //　再帰的なフォルダ検索
